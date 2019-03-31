@@ -1,0 +1,11 @@
+[package]
+name = "srvzio"
+version = "1.0.0"
+authors = ["Ivan De Marino <detronizator@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+ctrlc = { version = "3.1.1", features = ["termination"] }
+
+[dev-dependencies]
+crossbeam-channel = "0.3.8"

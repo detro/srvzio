@@ -11,6 +11,11 @@ license = "BSD-3-Clause"
 readme = "README.md"
 edition = "2018"
 
+exclude = [
+    ".travis.yml",
+    ".gitignore",
+]
+
 [badges]
 maintenance = { status = "actively-developed" }
 travis-ci = { repository = "detro/srvzio", branch = "master" }

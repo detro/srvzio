@@ -1,0 +1,14 @@
+language: rust
+cache: cargo
+
+# Run the build against the "recommended" versions
+rust:
+  - stable
+  - beta
+  - nightly
+
+matrix:
+  # Nightly can fail: it's OK, we won't judge
+  allow_failures:
+    - rust: nightly
+  fast_finish: true

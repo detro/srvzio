@@ -1,4 +1,7 @@
+[![Crates.io](http://meritbadge.herokuapp.com/srvzio)](https://crates.io/crates/srvzio)
 [![Build Status](https://travis-ci.org/detro/srvzio.svg?branch=master)](https://travis-ci.org/detro/srvzio)
+[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
+[![Doc.rs](https://docs.rs/srvzio/badge.svg)](https://docs.rs/crate/srvzio)
 
 # srvzio - an helpful crate to implement services
 

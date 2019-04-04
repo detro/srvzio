@@ -5,6 +5,7 @@ description = "An helpful crate to implement services"
 
 authors = ["Ivan De Marino <detronizator@gmail.com>"]
 
+documentation = "https://docs.rs/crate/srvzio"
 repository = "https://github.com/detro/srvzio"
 license = "BSD-3-Clause"
 

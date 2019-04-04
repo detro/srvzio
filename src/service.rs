@@ -10,27 +10,43 @@
 pub trait Service {
 
   /// Starts the service
-  fn start(&mut self) {
-    // By default, nothing to do
-  }
+  fn start(&mut self);
 
   /// Awaits that the service is done starting.
+  ///
+  /// Implement to provide sensible logic to wait for a service to be fully started.
   ///
   /// This is usually used _after_ a call to `start()`.
   fn await_started(&mut self) {
     // By default, nothing to do
   }
 
-  /// Stops the service
-  fn stop(&mut self) {
-    // By default, nothing to do
+  /// Starts the service and waits for it to be done starting.
+  ///
+  /// A _graceful_ start.
+  fn start_and_await(&mut self) {
+    self.start();
+    self.await_started();
   }
 
+  /// Stops the service
+  fn stop(&mut self);
+
   /// Awaits that the service is done stopping.
+  ///
+  /// Implement to provide sensible logic to wait for a service to be fully stopped.
   ///
   /// This is usually used _after_ a call to `stop()`.
   fn await_stopped(&mut self) {
     // By default, nothing to do
+  }
+
+  /// Stops the service and waits for it to be done stopping.
+  ///
+  /// A _graceful_ stop.
+  fn stop_and_await(&mut self) {
+    self.stop();
+    self.await_stopped();
   }
 
 }

@@ -1,6 +1,7 @@
 //! Where you have services, you need managers
 
 use crate::service::Service;
+use crate::utils;
 
 /// Manages an internal collection of Services
 ///
@@ -12,6 +13,11 @@ use crate::service::Service;
 ///
 /// The design implies that in your application, you would hand over all the instances of `Service`
 /// to a `ServiceManager`, that will then orchestrate their starting and stopping.
+///
+/// Thanks to the use of Composite Pattern, it can contain further instances of `ServiceManager`,
+/// allowing for the creation of complex
+/// [DAG diagrams](https://en.wikipedia.org/wiki/Directed_acyclic_graph) of services,
+/// with expressive relationship between them.
 pub struct ServiceManager {
   services: Vec<Box<Service>>
 }
@@ -27,6 +33,9 @@ impl ServiceManager {
 
   /// Register an instance of `Service`.
   ///
+  /// The order of registration is important: `Service`s are started in order, and stopped
+  /// in reverse order.
+  ///
   /// # Parameters
   ///
   /// * `service_box`: a `Box` containing an instance of implementation of the `Service` trait
@@ -34,38 +43,76 @@ impl ServiceManager {
     self.services.push(service_box);
   }
 
+  /// Wait for the Process to receive a termination signal, then stop this `ServiceManager`.
+  ///
+  /// It's strongly advised to use this method only onces, for the _root_ `ServiceManager`,
+  /// at the end of the `main()` thread.
+  pub fn wait_termination_signal_then_stop(&mut self) {
+    // Block until the process is terminated by a signal...
+    utils::wait_for_process_termination_signal();
+
+    // ... then gracefully shut every service down
+    self.stop_and_await();
+  }
+
+  /// Apply the same closure to all contained `Service`s, in order
+  fn apply_ordered<F>(&mut self, closure: F) where F: Fn(&mut Box<Service>) -> () {
+    self.services
+      .iter_mut()
+      .for_each(closure);
+  }
+
+  /// Apply the same closure to all contained `Service`s, in reverse order
+  fn apply_reversed<F>(&mut self, closure: F) where F: FnMut(&mut Box<Service>) -> () {
+    self.services
+      .iter_mut()
+      .rev()
+      .for_each(closure);
+  }
+
 }
 
 impl Service for ServiceManager {
 
-  /// Start all the registered `Service`s, in the order of registration
+  /// Start all registered `Service`s, in order of registration
   fn start(&mut self) {
-    self.services
-      .iter_mut()
-      .for_each(|s| s.start());
+    self.apply_ordered(|s: &mut Box<Service>| s.start());
   }
 
-  /// Start all the registered `Service`s to be started, in the order of registration
+  /// Wait for all registered `Service`s to be started, in order of registration
   fn await_started(&mut self) {
-    self.services
-      .iter_mut()
-      .for_each(|s| s.await_started());
+    self.apply_ordered(|s: &mut Box<Service>| s.await_started());
   }
 
-  /// Stop all the registered `Service`s, in the inverse order of registration
+  /// Start and then wait for all registered `Service`, in order of registration
+  ///
+  /// This is different then calling `start()` and then `await_started()`, because this method
+  /// will wait for a `Service` to be started, before moving to the next one.
+  ///
+  /// This can be used to implement a _gracefull start_.
+  fn start_and_await(&mut self) {
+    self.apply_ordered(|s: &mut Box<Service>| s.start_and_await());
+  }
+
+
+  /// Stop all registered `Service`s, in reverse order of registration
   fn stop(&mut self) {
-    self.services
-      .iter_mut()
-      .rev()
-      .for_each(|s| s.stop());
+    self.apply_reversed(|s: &mut Box<Service>| s.stop());
   }
 
-  /// Start all the registered `Service`s to be stopped, in the reverse order of registration
+  /// Wait for all registered `Service`s to be stopped, in reverse order of registration
   fn await_stopped(&mut self) {
-    self.services
-      .iter_mut()
-      .rev()
-      .for_each(|s| s.await_stopped());
+    self.apply_reversed(|s: &mut Box<Service>| s.await_stopped());
+  }
+
+  /// Stop and then wait for all registered `Service`, in reverse order of registration
+  ///
+  /// This is different then calling `stop()` and then `await_stopped()`, because this method
+  /// will wait for a `Service` to be stopped, before moving to the next one.
+  ///
+  /// This can be used to implement a _gracefull stop_.
+  fn stop_and_await(&mut self) {
+    self.apply_reversed(|s: &mut Box<Service>| s.stop_and_await());
   }
 
 }

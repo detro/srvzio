@@ -13,6 +13,7 @@ edition = "2018"
 
 [badges]
 maintenance = { status = "actively-developed" }
+travis-ci = { repository = "detro/srvzio", branch = "master" }
 
 [dependencies]
 ctrlc = { version = "3.1.1", features = ["termination"] }

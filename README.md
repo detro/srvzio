@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/detro/srvzio.svg?branch=master)](https://travis-ci.org/detro/srvzio)
+
 # srvzio - an helpful crate to implement services
 
 ## Services? What services?

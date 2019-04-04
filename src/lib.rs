@@ -1,6 +1,7 @@
 pub mod service;
 pub mod status;
 pub mod manager;
+pub mod utils;
 
 pub use service::Service;
 pub use status::*;
@@ -75,25 +76,54 @@ mod tests {
   }
 
   #[test]
-  fn should_start_and_stop_services() {
+  fn should_start_then_stop() {
     let (sender, receiver) = bounded(2);
     let mut sm = ServiceManager::new();
+    let sa_delay = 1000;
+    let sb_delay = 2000;
 
-    sm.register(Box::new(ExampleService::new("SA".to_string(), Duration::from_millis(123), sender.clone())));
-    sm.register(Box::new(ExampleService::new("SB".to_string(), Duration::from_millis(234), sender.clone())));
+    sm.register(Box::new(ExampleService::new("SA".to_string(), Duration::from_millis(sa_delay), sender.clone())));
+    sm.register(Box::new(ExampleService::new("SB".to_string(), Duration::from_millis(sb_delay), sender.clone())));
 
     let now = Instant::now();
     sm.start();
     sm.await_started();
-    assert!(now.elapsed().as_millis() >= 234);
+    let start_time = now.elapsed().as_millis();
+    assert!(start_time >= sb_delay as u128);
+    assert!(start_time < (sb_delay + sa_delay) as u128);
     assert_eq!("Service SA STARTED", receiver.recv().unwrap());
     assert_eq!("Service SB STARTED", receiver.recv().unwrap());
 
     let now = Instant::now();
     sm.stop();
     sm.await_stopped();
-    assert!(now.elapsed().as_millis() >= 234);
+    let stop_time = now.elapsed().as_millis();
+    assert!(stop_time >= sb_delay as u128);
+    assert!(start_time < (sb_delay + sa_delay) as u128);
     assert_eq!("Service SA STOPPED", receiver.recv().unwrap());
     assert_eq!("Service SB STOPPED", receiver.recv().unwrap());
+  }
+
+  #[test]
+  fn should_start_and_await_then_stop_and_await() {
+    let (sender, receiver) = bounded(2);
+    let mut sm = ServiceManager::new();
+    let sa_delay = 1000;
+    let sb_delay = 2000;
+
+    sm.register(Box::new(ExampleService::new("SA".to_string(), Duration::from_millis(sa_delay), sender.clone())));
+    sm.register(Box::new(ExampleService::new("SB".to_string(), Duration::from_millis(sb_delay), sender.clone())));
+
+    let now = Instant::now();
+    sm.start_and_await();
+    assert!(now.elapsed().as_millis() >= (sa_delay + sb_delay) as u128);
+    assert_eq!("Service SA STARTED", receiver.recv().unwrap());
+    assert_eq!("Service SB STARTED", receiver.recv().unwrap());
+
+    let now = Instant::now();
+    sm.stop_and_await();
+    assert!(now.elapsed().as_millis() >= (sa_delay + sb_delay) as u128);
+    assert_eq!("Service SB STOPPED", receiver.recv().unwrap());
+    assert_eq!("Service SA STOPPED", receiver.recv().unwrap());
   }
 }

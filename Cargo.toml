@@ -1,5 +1,5 @@
 [package]
-version = "1.0.1"
+version = "1.0.2-alpha.0"
 name = "srvzio"
 description = "An helpful crate to implement services"
 

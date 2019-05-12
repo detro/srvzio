@@ -9,6 +9,9 @@
 /// actual implementor to decide what is fitting to implement, and what is not.
 pub trait Service {
 
+  /// Service name
+  fn name(&self) -> &'static str;
+
   /// Starts the service
   fn start(&mut self);
 

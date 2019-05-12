@@ -13,7 +13,7 @@ use ctrlc;
 ///
 /// Just call this in your `main()` and add your "graceful termination logic" afterwards: it might
 /// be a bit _naive_, but it's simple and easy to use.
-pub fn wait_for_process_termination_signal() {
+pub fn await_for_process_termination_signal() {
   let (term_sender, term_receiver) = crossbeam_channel::bounded(1);
 
   // Register termination signal handler that sends a single message across the channel

@@ -118,6 +118,22 @@ impl ServiceStatusFlag {
     self.get_status() == ServiceStatus::Stopped
   }
 
+  /// Await started
+  ///
+  /// This method **blocks** the current thread until the `ServiceStatus::Started` is set on
+  /// this instance by _another_ thread.
+  pub fn await_started(&self) {
+    while !self.is_started() {};
+  }
+
+  /// Await stopped
+  ///
+  /// This method **blocks** the current thread until the `ServiceStatus::Stopped` is set on
+  /// this instance by _another_ thread.
+  pub fn await_stopped(&self) {
+    while !self.is_stopped() {};
+  }
+
 }
 
 impl Default for ServiceStatusFlag {

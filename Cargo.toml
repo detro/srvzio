@@ -22,7 +22,7 @@ maintenance = { status = "actively-developed" }
 travis-ci = { repository = "detro/srvzio", branch = "master" }
 
 [dependencies]
-ctrlc = { version = "3.1.2", features = ["termination"] }
+ctrlc = { version = "3.1.3", features = ["termination"] }
 crossbeam-channel = "0.3.8"
 log = "0.4.6"
 
